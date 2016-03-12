@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="js/d3.v3.min.js"></script>
+    <style>
+        .chart {
+            margin: 50px;
+            overflow: visible;
+        }
+
+        .chart rect {
+            fill: steelblue;
+        }
+
+        .axis text {
+            font: 10px sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #999;
+            shape-rendering: crispEdges;
+        }
+
+        .chart .axis-title {
+            fill: #999;
+            text-anchor: end;
+
+        }
+    </style>
+</head>
+<body>
+<script>
+    // Load data
+    d3.json('data.json', function (data) {
+        var margin = {top: 20, right: 30, bottom: 30, left: 40},
+                width = 960 - margin.left - margin.right,
+                height = 500 - margin.top - margin.bottom;
+
+        // y scale
+        var y = d3.scale.linear().domain([0, d3.max(data, function (d) {
+                    return d.value
+                })])
+                .range([0, height]);
+
+        // x scale, divide the xaxis into evenly-spaced bands according to the categories
+        var x = d3.scale.ordinal().domain(data.map(function (d) {
+                    return d.category;
+                }))
+                .rangeRoundBands([0, width], .1);
+
+        // add svg
+        var chart = d3.select('body').append('svg').attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .attr('class', 'chart')
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        ;
+
+        // add graphics
+        var graphics = chart.selectAll('g').data(data).enter().append('g')
+                .attr('transform', function (d, i) {
+                    return "translate(" + x(d.category) + ",0)";
+                });
+
+        // add rects
+        graphics.append('rect').attr('width', x.rangeBand())
+                .attr('y',function (d, i) {
+                    return height - y(d.value);
+                }).attr('height', function (d, i) {
+                    return y(d.value);
+                });
+
+        // add texts
+        graphics.append('text').attr('x', x.rangeBand() / 2)
+                .style('fill', 'white').style('text-anchor', 'middle')
+                .attr('y',function (d, i) {
+                    return height - y(d.value) + 20;
+                }).text(function (d) {
+                    return d.value
+                });
+
+        // add x axis
+        var xAxis = d3.svg.axis().scale(x).orient('bottom');
+        chart.append('g').attr('class', 'x axis').attr('transform', 'translate(0,' + (height + 10) + ')').call(xAxis);
+        // add x axis title
+        chart.append('text').attr('class', 'axis-title').attr('x', width + margin.left).attr('y', height + margin.top)
+                .text('Name');
+
+        // add y axis
+        var yAxis = d3.svg.axis().scale(y).orient('left');
+        chart.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
+        // add y axis title
+        chart.append('text').attr('transform', 'rotate(-90)')
+                .attr('x', 0).attr('y', 6).attr('dy', '.75em')
+                .attr('class', 'axis-title')
+                .text('Value');
+    });
+
+
+</script>
+</body>
+</html>

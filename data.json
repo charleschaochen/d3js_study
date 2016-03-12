@@ -1,0 +1,26 @@
+[
+    {
+        "category": "charles",
+        "value": 20
+    },
+    {
+        "category": "echo",
+        "value": 25
+    },
+    {
+        "category": "ella",
+        "value": 40
+    },
+    {
+        "category": "leonard",
+        "value": 32
+    },
+    {
+        "category": "emily",
+        "value": 44
+    },
+    {
+        "category": "peter",
+        "value": 10
+    }
+]

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="../js/d3/d3.v3.min.js"></script>
+</head>
+<body>
+<p>1</p>
+<p>2</p>
+<p>3</p>
+<p>4</p>
+<p>5</p>
+<p>6</p>
+
+<script>
+    d3.select('body').selectAll('p')
+            .data([11,12,13,14,15,16,17,18])
+            .text(function(d){
+                return 'i am number ' + d;
+            })
+            .enter().append('p')
+            .text(function(d){
+                return 'i am number ' + d;
+            })
+//            .exit().remove();
+</script>
+</body>
+</html>

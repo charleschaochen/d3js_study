@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="js/d3.v3.min.js"></script>
+    <style>
+        
+    </style>
+</head>
+<body>
+<script>
+    var data_circles = [
+        {x: 50, y: 50, r: 20},
+        {x: 100, y: 80, r: 30},
+        {x: 40, y: 250, r: 40},
+        {x: 300, y: 250, r: 45},
+        {x: 350, y: 50, r: 25},
+        {x: 280, y: 120, r: 40},
+         {x: 200, y: 250, r: 40}
+    ]
+    var colors = d3.scale.linear().domain([0, data_circles.length-1]).range(["red", "green", "blue"]);
+    
+    var width = 400, height = 400;
+    var chart = d3.select('body').append('svg').attr('width', width).attr('height', height);    // add svg
+    var circles = chart.selectAll('circle').data(data_circles)
+        .enter().append('circle')
+        .attr('cx', function(d){return d.x;})
+        .attr('cy', function(d){return d.y;})
+        .attr('r', function(d){return d.r;})
+        .attr('fill', function(d, i){return colors(i);})
+
+</script>
+</body>
+</html>
