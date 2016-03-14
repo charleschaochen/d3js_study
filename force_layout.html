@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>画一个力学图(Force)</title>
+    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+</head>
+<style type="text/css">
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        cursor: pointer;
+    }
+
+    .node-text {
+        fill: #000;
+        font-size: 12px;
+        cursor: pointer;
+        pointer-events: none;
+        text-anchor: middle;
+    }
+
+    .link {
+        stroke: #09F;
+        stroke-opacity: 0.4;
+        stroke-width: 1;
+    }
+</style>
+<body>
+<script type="text/javascript">
+    var width = 960, height = 600;
+
+    var color = d3.scale.category20();  //  取得20个颜色的序列
+
+    // 定义画布
+    var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+    // 定义力学结构
+    var force = d3.layout.force()
+            .charge(-150)   // 负数表示互斥
+            .linkDistance(120)  // 节点间的连线距离
+            .linkStrength(0.1)
+            .friction(0.9)
+            .gravity(0.2)
+            .size([width, height]); // 布局的尺寸
+
+    //读取数据
+    d3.json("data/force_layout_data.json", function (error, graph) {
+        force.nodes(graph.nodes)    // 设置节点
+                .links(graph.links) // 设置连线
+                .start();   // 开始布局
+
+        // 画节点连线
+        var link = svg.selectAll(".link")
+                .data(graph.links)
+                .enter()
+                .append("line")
+                .attr("class", "link");
+
+        // 画节点，每个节点是一个graphic，每个graphic会添加title，circle，text
+        var drag = force.drag().on("dragstart", function(d){
+            d.fixed = true;
+        });
+        var node = svg.selectAll("g")
+                .data(graph.nodes)
+                .enter()
+                .append("g")
+                .call(drag);  // 设置节点可拖拽
+        node.append("circle")
+                .attr("class", "node")
+                .attr("r", function (d) {
+                    return 10 + d.group;
+                })
+                .style("fill", function (d) {
+                    return color(d.group);
+                });
+
+        // 添加title
+        node.append("title")
+                .text(function (d) {
+                    return d.name;
+                });
+        // 添加text显示节点内容
+        node.append("text")
+                .attr("dy", ".3em")
+                .attr("class", "node-text")
+                .text(function (d) {
+                    return d.name;
+                });
+
+        // 开始力学动作
+        force.on("tick", function () {
+            link.attr("x1", function (d) {
+                return d.source.x;
+            })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
+            node.attr("transform", function (d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
+        });
+    });
+</script>
+</body>
+</html>

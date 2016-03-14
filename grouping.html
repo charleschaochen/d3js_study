@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>画一个力学图(Force)</title>
+    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+</head>
+<style type="text/css">
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    svg {
+        margin: 0 auto;
+        display: block;
+    }
+
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        cursor: pointer;
+    }
+
+    .node-text {
+        fill: #000;
+        font-size: 12px;
+        cursor: pointer;
+        pointer-events: none;
+        text-anchor: middle;
+    }
+
+    .link {
+        stroke: #09F;
+        stroke-opacity: 0.4;
+        stroke-width: 1;
+    }
+
+    .group-title {
+        fill: #333;
+        font-size: 18px;
+        text-anchor: left;
+        font-weight: bold;
+    }
+</style>
+<body>
+<script type="text/javascript">
+    var width = 1280, height = 1000;
+
+    var fColor = d3.scale.category20(); // colors
+
+    var svg = d3.select('body').append('svg').attr('width', width).attr('height', height);
+
+    d3.json('data/groups_data.json', function (error, data) {
+        var aGroups = data.groups;
+        var aNodes = data.nodes;
+
+        // Draw group titles
+        svg.selectAll('.group-title').data(aGroups).enter().append('text')
+                .attr('class', 'group-title')
+                .attr('transform', function (d, i) {
+                    switch (i) {
+                        case 0:
+                            return "translate(0,50)";
+                        case 1:
+                            return "translate(" + (width/2) + ",50)";
+                        case 2:
+                            return "translate(50," + (height/2) + ")";
+                        case 3:
+                            return "translate(" + (width/2) + "," + (height/2) + ")";
+                        default :
+                            return "translate(-1000,-1000)";
+                    }
+                }).text(function (d) {
+                    return d
+                });
+
+        // Group the nodes
+        var aNodesArr = [];
+        aNodes.forEach(function (oNode) {
+            var nGroup = oNode.group;
+            if (!aNodesArr[nGroup]) aNodesArr[nGroup] = [];
+            aNodesArr[nGroup].push(oNode);
+        });
+
+        // Draw force
+        aNodesArr.forEach(function (aOneGroupNodes, i) {
+            var force = d3.layout.force()
+                    .charge(-40)
+                    .size([width / 2, height / 2])
+                    .nodes(aOneGroupNodes)
+                    .start();
+            var sTransform = null;
+            switch (i) {
+                case 0:
+                    sTransform = "translate(50,50)";
+                    break;
+                case 1:
+                    sTransform = "translate(" + (width / 2) + ",50)";
+                    break;
+                case 2:
+                    sTransform = "translate(50," + (height / 2) + ")";
+                    break;
+                case 3:
+                    sTransform = "translate(" + (width / 2) + "," + (height / 2) + ")";
+                    break;
+                default :
+                    sTransform = "translate(-1000,-1000)";
+                    break;
+            }
+
+            var g = svg.append('g').attr('transform', sTransform);
+
+            // Add nodes
+            var node = g.selectAll('g').data(aOneGroupNodes).enter().append('g').call(force.drag);
+            // Add circles
+            var circles = node.append('circle').attr('class', 'node').attr('r', function (d) {
+                return d.group + 15;
+            }).attr('fill', function (d, i) {
+                return fColor(d.group);
+            });
+
+            // Add texts
+            var texts = node.append('text').text(function (d) {
+                return d.name
+            }).attr('class', 'node-text').attr('dy', '.35em');
+            var titles = node.append('title').text(function (d) {
+                return d.name
+            });
+
+            force.on('tick', function () {
+                node.attr('transform', function (d, i) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                })
+            });
+
+
+        });
+    })
+</script>
+</body>
+</html>
